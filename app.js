@@ -10,6 +10,7 @@ var FileStore = require("session-file-store")(session);
 var passport = require("passport");
 var authenticate = require("./authenticate");
 var config = require("./config");
+const uploadRouter = require("./routes/uploadRouter");
 
 const url = config.mongoUrl;
 const connect = mongoose.connect(url);
@@ -58,6 +59,7 @@ app.use("/users", usersRouter);
 app.use("/leaders", leaderRouter);
 app.use("/promotions", promoRouter);
 app.use("/dishes", dishRouter);
+app.use("/imageUpload", uploadRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
