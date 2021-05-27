@@ -68,32 +68,27 @@ favoriteRouter
     res.sendStatus(200);
   })
   .get(cors.cors, authenticate.verifyUser, (req, res, next) => {
-    Favorites.find({ user: req.user.id })
+    Favorites.findOne({ user: req.user._id })
       .then(
         (favorites) => {
-          if (!favorites.length) {
-            let err = new Error("Favorites not found!");
-            err.status = 404;
-            throw err;
-          }
-          favoriteDishes = favorites[0].dishes.filter(
-            (dishId) => req.params.dishId == dishId
-          );
-          if (favoriteDishes.length) {
-            return Dishes.findById(favoriteDishes[0]);
+          if (!favorites) {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "application/json");
+            return res.json({ exists: false, favorites: favorites });
           } else {
-            let err = new Error("Dish not found in the favorites");
-            err.status = 404;
-            throw err;
+            if (favorites.dishes.indexOf(req.params.dishId) < 0) {
+              res.statusCode = 200;
+              res.setHeader("Content-Type", "application/json");
+              return res.json({ exists: false, favorites: favorites });
+            } else {
+              res.statusCode = 200;
+              res.setHeader("Content-Type", "application/json");
+              return res.json({ exists: true, favorites: favorites });
+            }
           }
         },
         (err) => next(err)
       )
-      .then((dish) => {
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
-        res.json(dish);
-      })
       .catch((err) => next(err));
   })
   .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
